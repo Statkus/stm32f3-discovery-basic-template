@@ -1,6 +1,7 @@
 # compilation results #
 #######################
 *.o
+*.d
 *.a
 *.bin
 *.elf
@@ -12,13 +13,3 @@
 #########################
 dirs
 program
-
-# Eclipse & editor files #
-#########################
-.project
-.cproject
-*~
-
-# Log files #
-#############
-openocd.log
