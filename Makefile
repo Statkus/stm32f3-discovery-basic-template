@@ -11,23 +11,21 @@ PROJECT_NAME = main
 STD_PERIPH_LIB = Libraries
 
 # Location of the linker scripts
-LDSCRIPT_INC=Device/ldscripts
+LDSCRIPT_INC = Device/ldscripts
 
 # location of OpenOCD Board .cfg files (only used with 'make program')
-OPENOCD_BOARD_DIR=/usr/share/openocd/scripts/board
+OPENOCD_BOARD_DIR = /usr/share/openocd/scripts/board
 
 # Configuration (cfg) file containing programming directives for OpenOCD
-OPENOCD_PROC_FILE=extra/stm32f3-openocd.cfg
-
-# that's it, no need to change anything below this line!
+OPENOCD_PROC_FILE = extra/stm32f3-openocd.cfg
 
 ###################################################
 
-CC=arm-none-eabi-gcc
-GDB=arm-none-eabi-gdb
-OBJCOPY=arm-none-eabi-objcopy
-OBJDUMP=arm-none-eabi-objdump
-SIZE=arm-none-eabi-size
+CC      = arm-none-eabi-gcc
+GDB     = arm-none-eabi-gdb
+OBJCOPY = arm-none-eabi-objcopy
+OBJDUMP = arm-none-eabi-objdump
+SIZE    = arm-none-eabi-size
 
 CFLAGS  = -Wall -g -std=c99 -Os
 CFLAGS += -mlittle-endian -mcpu=cortex-m4  -march=armv7e-m -mthumb
@@ -39,8 +37,6 @@ LDFLAGS += -Wl,--gc-sections -Wl,-Map=$(PROJECT_NAME).map
 ###################################################
 
 vpath %.a $(STD_PERIPH_LIB)
-
-ROOT=$(shell pwd)
 
 CFLAGS += -I $(INC_DIR)
 CFLAGS += -I $(STD_PERIPH_LIB)
@@ -66,11 +62,10 @@ all: lib proj
 lib:
 	$(MAKE) -C $(STD_PERIPH_LIB)
 
-proj: 	$(PROJECT_NAME).elf
+proj: $(PROJECT_NAME).elf
 
 dirs:
 	mkdir -p deps objs
-	touch dirs
 
 objs/%.o : $(SRC_DIR)/%.c dirs
 	$(CC) $(CFLAGS) -c -o $@ $< -MMD -MF deps/$(*F).d
@@ -89,10 +84,8 @@ debug: program
 	$(GDB) -x extra/gdb_cmds $(PROJECT_NAME).elf
 
 clean:
-	find ./ -name '*~' | xargs rm -f	
-	rm -f objs/*.o
-	rm -f deps/*.d
-	rm -f dirs
+	rm -rf objs
+	rm -rf deps
 	rm -f $(PROJECT_NAME).elf
 	rm -f $(PROJECT_NAME).hex
 	rm -f $(PROJECT_NAME).bin

@@ -1,5 +1,5 @@
-CC=arm-none-eabi-gcc
-AR=arm-none-eabi-ar
+CC = arm-none-eabi-gcc
+AR = arm-none-eabi-ar
 
 ###########################################
 
@@ -9,9 +9,9 @@ CFLAGS  = -g -O2 -Wall
 CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m4 -march=armv7e-m
 CFLAGS += -mfpu=fpv4-sp-d16 -mfloat-abi=hard
 CFLAGS += -ffreestanding -nostdlib
-CFLAGS += -includestm32f30x_conf.h 
-CFLAGS += -ICMSIS/Include 
-CFLAGS += -ICMSIS/Device/ST/STM32F30x/Include 
+CFLAGS += -includestm32f30x_conf.h
+CFLAGS += -ICMSIS/Include
+CFLAGS += -ICMSIS/Device/ST/STM32F30x/Include
 CFLAGS += -ISTM32F30x_StdPeriph_Driver/inc
 CFLAGS += -ISTM32_USB-FS-Device_Driver/inc
 CFLAGS += -I../inc
@@ -36,7 +36,6 @@ all: libstm32f3.a
 
 dirs:
 	mkdir -p deps objs
-	touch dirs
 
 objs/%.o : %.c dirs
 	$(CC) $(CFLAGS) -c -o $@ $< -MMD -MF deps/$(*F).d
@@ -45,4 +44,6 @@ libstm32f3.a: $(OBJS)
 	$(AR) -r $@ $(OBJS)
 
 clean:
-	rm -f dirs $(OBJS) $(DEPS) libstm32f3.a
+	rm -rf objs
+	rm -rf deps
+	rm -f libstm32f3.a
