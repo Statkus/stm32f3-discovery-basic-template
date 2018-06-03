@@ -16,9 +16,6 @@ LDSCRIPT_INC = Device/ldscripts
 # location of OpenOCD Board .cfg files (only used with 'make program')
 OPENOCD_BOARD_DIR = /usr/share/openocd/scripts/board
 
-# Configuration (cfg) file containing programming directives for OpenOCD
-OPENOCD_PROC_FILE = extra/stm32f3-openocd.cfg
-
 ###################################################
 
 CC      = arm-none-eabi-gcc
@@ -78,7 +75,7 @@ $(PROJECT_NAME).elf: $(OBJS)
 	$(SIZE) $(PROJECT_NAME).elf
 
 program:
-	openocd -f $(OPENOCD_BOARD_DIR)/stm32f3discovery.cfg -f $(OPENOCD_PROC_FILE) -c "stm_flash `pwd`/$(PROJECT_NAME).bin" -c shutdown
+	openocd -f $(OPENOCD_BOARD_DIR)/stm32f3discovery.cfg -c "program `pwd`/$(PROJECT_NAME).bin verify reset exit 0x08000000"
 
 debug: program
 	$(GDB) -x extra/gdb_cmds $(PROJECT_NAME).elf
