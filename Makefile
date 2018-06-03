@@ -69,9 +69,7 @@ objs/%.o : $(SRC_DIR)/%.c dirs
 
 $(PROJECT_NAME).elf: $(OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ $(STARTUP) -L$(STD_PERIPH_LIB) -lstm32f3 -L$(LDSCRIPT_INC) -Tstm32f3.ld
-	$(OBJCOPY) -O ihex $(PROJECT_NAME).elf $(PROJECT_NAME).hex
 	$(OBJCOPY) -O binary $(PROJECT_NAME).elf $(PROJECT_NAME).bin
-	$(OBJDUMP) -St $(PROJECT_NAME).elf >$(PROJECT_NAME).lst
 	$(SIZE) $(PROJECT_NAME).elf
 
 program:
@@ -84,10 +82,8 @@ clean:
 	rm -rf objs
 	rm -rf deps
 	rm -f $(PROJECT_NAME).elf
-	rm -f $(PROJECT_NAME).hex
 	rm -f $(PROJECT_NAME).bin
 	rm -f $(PROJECT_NAME).map
-	rm -f $(PROJECT_NAME).lst
 
 reallyclean: clean
 	$(MAKE) -C $(STD_PERIPH_LIB) clean
