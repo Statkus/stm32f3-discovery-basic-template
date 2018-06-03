@@ -4,16 +4,15 @@ INC_DIR ?= inc
 SRCS = $(wildcard $(SRC_DIR)/*.c)
 SRCS_NO_DIR = $(notdir $(SRCS))
 
-# All the files will be generated with this name (main.elf, main.bin, main.hex, etc)
-PROJECT_NAME = main
+PROJECT_NAME ?= main
 
-# Location of the Libraries folder from the STM32F3xx Standard Peripheral Library
-STD_PERIPH_LIB = Libraries
+# Location of the STM32F3xx Standard Peripheral Library
+STD_PERIPH_LIB_DIR = Libraries
 
 # Location of the linker scripts
-LDSCRIPT_INC = Device/ldscripts
+LDSCRIPTS_DIR = Device/ldscripts
 
-# location of OpenOCD Board .cfg files (only used with 'make program')
+# Location of OpenOCD board .cfg files
 OPENOCD_BOARD_DIR = /usr/share/openocd/scripts/board
 
 ###################################################
@@ -33,15 +32,15 @@ LDFLAGS += -Wl,--gc-sections -Wl,-Map=$(PROJECT_NAME).map
 
 ###################################################
 
-vpath %.a $(STD_PERIPH_LIB)
+vpath %.a $(STD_PERIPH_LIB_DIR)
 
 CFLAGS += -I $(INC_DIR)
-CFLAGS += -I $(STD_PERIPH_LIB)
-CFLAGS += -I $(STD_PERIPH_LIB)/CMSIS/Device/ST/STM32F30x/Include
-CFLAGS += -I $(STD_PERIPH_LIB)/CMSIS/Include
-CFLAGS += -I $(STD_PERIPH_LIB)/STM32F30x_StdPeriph_Driver/inc
-CFLAGS += -I $(STD_PERIPH_LIB)/STM32_USB-FS-Device_Driver/inc
-CFLAGS += -include $(STD_PERIPH_LIB)/stm32f30x_conf.h
+CFLAGS += -I $(STD_PERIPH_LIB_DIR)
+CFLAGS += -I $(STD_PERIPH_LIB_DIR)/CMSIS/Device/ST/STM32F30x/Include
+CFLAGS += -I $(STD_PERIPH_LIB_DIR)/CMSIS/Include
+CFLAGS += -I $(STD_PERIPH_LIB_DIR)/STM32F30x_StdPeriph_Driver/inc
+CFLAGS += -I $(STD_PERIPH_LIB_DIR)/STM32_USB-FS-Device_Driver/inc
+CFLAGS += -include $(STD_PERIPH_LIB_DIR)/stm32f30x_conf.h
 
 STARTUP = Device/startup_stm32f30x.s # add startup file to build
 
@@ -50,14 +49,14 @@ DEPS = $(addprefix deps/,$(SRCS_NO_DIR:.c=.d))
 
 ###################################################
 
-.PHONY: all lib proj program debug clean reallyclean
+.PHONY: all lib proj flash debug clean
 
 all: lib proj
 
 -include $(DEPS)
 
 lib:
-	$(MAKE) -C $(STD_PERIPH_LIB)
+	$(MAKE) -C $(STD_PERIPH_LIB_DIR)
 
 proj: $(PROJECT_NAME).elf
 
@@ -68,22 +67,20 @@ objs/%.o : $(SRC_DIR)/%.c dirs
 	$(CC) $(CFLAGS) -c -o $@ $< -MMD -MF deps/$(*F).d
 
 $(PROJECT_NAME).elf: $(OBJS)
-	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ $(STARTUP) -L$(STD_PERIPH_LIB) -lstm32f3 -L$(LDSCRIPT_INC) -Tstm32f3.ld
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ $(STARTUP) -L$(STD_PERIPH_LIB_DIR) -lstm32f3 -L$(LDSCRIPTS_DIR) -Tstm32f3.ld
 	$(OBJCOPY) -O binary $(PROJECT_NAME).elf $(PROJECT_NAME).bin
 	$(SIZE) $(PROJECT_NAME).elf
 
-program:
+flash:
 	openocd -f $(OPENOCD_BOARD_DIR)/stm32f3discovery.cfg -c "program `pwd`/$(PROJECT_NAME).bin verify reset exit 0x08000000"
 
-debug: program
+debug: flash
 	$(GDB) -x extra/gdb_cmds $(PROJECT_NAME).elf
 
 clean:
+	$(MAKE) -C $(STD_PERIPH_LIB_DIR) clean
 	rm -rf objs
 	rm -rf deps
 	rm -f $(PROJECT_NAME).elf
 	rm -f $(PROJECT_NAME).bin
 	rm -f $(PROJECT_NAME).map
-
-reallyclean: clean
-	$(MAKE) -C $(STD_PERIPH_LIB) clean
